@@ -183,7 +183,9 @@
                                         nesta vaga.</span>
 
                                     <button data-id="{{ vaga.id }}" data-bs-toggle="modal" data-bs-target="#compatibilidade" class="compatibilidadeButton btn btn-warning text-white text-uppercase fw-bold">Verificar compatibilidade <i class="bi bi-lightning-charge-fill"></i></button>
-                                    {% if session['candidato'] in vaga.candidatosID  %}
+                                    {% if vaga.candidatosQtd == 3 %}
+                                        <button type="button" class="btn btn-secondary text-uppercase fw-bold small" disabled>LIMITE ATINGIDO</button>
+                                    {% elif session['candidato'] in vaga.candidatosID  %}
                                         <form action="{{ url_for('candidato_retirar', vaga_id=vaga.id) }}" method="POST">
                                             <button type="submit" class="btn btn-danger text-uppercase fw-bold d-flex justify-content-center align-items-center" >Retirar candidatura <i class="ms-2 text-white bi bi-box-arrow-right"></i></button>
                                         </form>
@@ -242,6 +244,7 @@
                         <button class="btn btn-primary p-2 my-3 text-white text-uppercase fw-bold" type="submit">Logar</button>
 
                         <p class="text-center" style="font-size: 0.8rem">Ainda não tem um cadastro? <span class="change_form">Cadastre-se</span> </p>
+                        <a class="text-center" href="/coordenador" style="font-size: 0.8rem">Página do coordenador</a>
                     </form>
 
                     <form id="register_form" novalidate class='needs-validation vaga_form d-none d-flex w-75 shadow rounded flex-column p-2 pe-3 ps-3' action="{{ url_for('registrar', tipo='candidato') }}" method="POST">
@@ -290,6 +293,7 @@
                         <button class="btn btn-primary p-2 my-3 text-white text-uppercase fw-bold" type="submit">Cadastrar-se</button>
 
                         <p class="text-center" style="font-size: 0.8rem">Já tem um cadastro? <span class="change_form">Login</span> </p>
+                        <a class="text-center" href="/coordenador" style="font-size: 0.8rem">Página do coordenador</a>
                     </form>
                 </div>
             {% endif %}
