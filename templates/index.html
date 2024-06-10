@@ -1,0 +1,296 @@
+{% extends 'template.html' %}
+{% block title %}DevEstagios - Home{% endblock %}
+{% block perfil %}{% if 'candidato' in session %}<p class="mb-0 text-uppercase fw-bold text-white">Perfil</p> <i id="profileIcon" class="fs-1 text-white bi bi-person-circle" style="cursor: pointer"></i>{% endif %} {% endblock %}
+{% block logout %}{% if 'candidato' in session %}
+    <form style="cursor: pointer" class="d-flex align-items-center justify-content-center gap-2" id="logout_form" action="{{ url_for('deslogar', tipo='candidato') }}" method="POST">
+        <p class="mb-0 text-uppercase fw-bold text-white">SAIR</p>
+        <i class="navbar-text text-danger fs-4 bi bi-box-arrow-right"></i>
+    </form>
+{% endif %} {% endblock %}
+
+{% block usuario %}
+    {% if 'candidato' in session %}
+    {{ candidato.nome }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+
+            {% if 'candidato' in session %}
+                <a id="data-login-checker" data-login-checker="candidato"></a>
+
+                <form class='vaga_form w-100 flex-column p-2 pe-3 ps-3 d-flex align-items-center' action="{{ url_for('editar', tipo='candidato', id=candidato.id) }}" method="POST">
+                    <div class="modal fade" id="perfil" data-bs-backdrop="static" data-bs-keyboard="false"   tabindex="-1" aria-labelledby="perfil" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5 text-uppercase fw-bolder" id="staticBackdropLabel">Meu perfil</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>NOME</label>
+                                            <input class='form-control' type="text" value="{{ candidato.nome }}" name="nome" disabled>
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>EMAIL</label>
+                                            <input class="form-control" type="email" maxlength="254" value="{{ candidato.email }}" name="email">
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>DATA DE NASCIMENTO</label>
+                                            <input class="form-control" type="text"  value="{{ candidato.nascimentoFormatado }}" name="nascimento" disabled>
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>GENERO</label>
+                                            <input class="form-control text-uppercase" type="text"  value="{{ candidato.genero }}" name="genero" disabled>
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>DESCRIÇÃO (Habilidades e autodescrição)</label>
+                                            <textarea class="form-control" style="height: 200px;resize: none;"  type="text" name="descricao" required>{{ candidato.descricao }}</textarea>
+                                        </div>
+
+                              </div>
+                                <div class="modal-footer">
+                                    <button id="avaliacaoButton" class="btn btn-warning  text-white text-uppercase fw-bolder" data-bs-toggle="modal" data-bs-target="#avaliacao">Avaliar descrição<i class="bi bi-lightning-charge-fill"></i></button>
+                                    <button class="btn btn-primary text-white text-uppercase fw-bolder" type="submit">Salvar</button>
+                                </div>
+
+                            </div>
+                          </div>
+                    </div>
+                </form>
+
+                <div class="modal fade" id="avaliacao" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"  aria-labelledby="avaliacao" aria-hidden="true">
+                      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                          <div class="modal-header d-flex justify-content-center">
+                            <h1 class="modal-title fs-5 text-uppercase fw-bolder text-center" id="staticBackdropLabel">Avaliação</h1>
+                          </div>
+                          <div class="modal-body p-3 d-flex flex-column align-items-center">
+
+                              <div id="spinnerAvaliacao" class="spinner-border p-3" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                              </div>
+                              <div id="avaliacaoDiv"></div>
+
+                          </div>
+                          <div class="modal-footer">
+                                 <button id="backAvaliacaoButton" class="btn btn-primary text-white text-uppercase fw-bolder" data-bs-toggle="modal" data-bs-target="#perfil">VOLTAR</button>
+                          </div>
+
+                        </div>
+                      </div>
+                </div>
+
+
+
+
+
+                <div class="w-100 d-flex px-3 mb-4 justify-content-center align-items-center">
+                    <button class="btn btn-primary text-uppercase fw-bolder" type="button" data-bs-toggle="offcanvas" data-bs-target="#minhasVagas" aria-controls="minhasVagas">VER CANDIDATURAS <i class="bi bi-eye ms-1"></i></button>
+                </div>
+
+
+                <div class="offcanvas offcanvas-start"  tabindex="-1" id="minhasVagas" aria-labelledby="minhasVagas" >
+                  <div class="offcanvas-header">
+                    <h5 class="offcanvas-title text-uppercase fw-bold" id="offcanvasExampleLabel">Minhas candidaturas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                  </div>
+
+
+                  <div class="offcanvas-body">
+                    {% for vaga in minhasVagas %}
+                        <div class="card mb-5 shadow ">
+                          <div class="card-header p-3 d-flex justify-content-start align-items-center">
+                              <p class="fs-5 fw-bold p-0 m-0 text-uppercase ">{{ vaga.titulo }}</p>
+                          </div>
+                          <div class="card-body p-3 small">
+                            <p class="card-text text-uppercase mb-1"><span class="fw-bold">Status:</span> {% if not vaga.selecionado %} <span class="text-warning">Aguardando coordenador...</span> {% else  %} <span class="text-success">Selecionado para entrevista!</span> {% endif %}</p>
+
+                          {% if not vaga.selecionado %}
+                            <div class="dropdown mt-3">
+                              <a class="btn btn-primary dropdown-toggle text-uppercase fw-bold" href="#" role="button" data-bs-toggle="dropdown" id="dropdownMenuButton1" aria-expanded="false">
+                                Ações
+                              </a>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                <li><a class="dropdown-item text-uppercase fw-bold" href="#" data-bs-toggle="modal" data-bs-target="#ver_detalhes_{{ vaga.id }}">Ver vaga</a></li>
+                                <form id="retirarForm" action="{{ url_for('candidato_retirar', vaga_id=vaga.id) }}" method="POST">
+                                    <li class="bg-danger text-uppercase fw-bold"><a class="dropdown-item text-uppercase fw-bold" href="#" onclick="document.getElementById('retirarForm').submit()">Retirar candidatura <i class="ms-2 text-white bi bi-box-arrow-right"></i></a></li>
+                                </form>
+                              </ul>
+                            </div>
+                          {% endif %}
+
+                          </div>
+                        </div>
+                    {% endfor %}
+
+                  </div>
+                </div>
+
+                {% for vaga in vagas %}
+                    {% if vaga.candidatosQtd < 5  %}
+                    <div class="card mb-5 shadow ">
+                      <div class="card-header p-3 d-flex justify-content-start align-items-center">
+                          <p class="fs-5 fw-bold p-0 m-0 text-uppercase ">{{ vaga.titulo }}</p>
+                      </div>
+                      <div class="card-body p-3 small">
+                        <p class="card-text text-uppercase mb-1"><span class="fw-bold">Concedente:</span> {{ vaga.concedente }}</p>
+                        <p class="card-text text-uppercase mb-1"><span class="fw-bold">Local de estágio:</span> {{ vaga.local }}</p>
+                        <p class="card-text text-uppercase "><span class="fw-bold">Valor da bolsa:</span> R${{ vaga.bolsa }}</p>
+
+                        <button class="btn btn-primary mt-1 text-uppercase fw-bold" data-bs-toggle="modal" data-bs-target="#ver_detalhes_{{ vaga.id }}">Ver detalhes</button>
+                      </div>
+                    </div>
+
+
+                    <div class="modal fade" id="ver_detalhes_{{ vaga.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="{{ vaga.id }}" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title text-uppercase fs-5 fw-bold" id="staticBackdropLabel">{{ vaga.titulo }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body text-uppercase">
+                                  <p class="mb-0 mt-3 fw-bold fs-6">Informações</p>
+                                  <hr class="mt-1"/>
+
+                                  <p class="card-text small mb-1"><span class="fw-bold">Concedente: </span>{{ vaga.concedente }}</p>
+                                  <p class="card-text small mb-1"><span class="fw-bold">Local de estágio: </span>{{ vaga.local }}</p>
+                                  <p class="card-text small mb-1"><span class="fw-bold">Valor da bolsa:</span> R${{ vaga.bolsa }}</p>
+                                  <p class="card-text small mb-1"><span class="fw-bold">Beneficios:</span> {{ vaga.beneficios }}</p>
+                                  <p class="card-text small  "><span class="fw-bold">Turno: </span>{{ vaga.turno }}</p>
+
+
+
+                                  <p class="mb-0 mt-4 fw-bold fs-6">Requisitos</p>
+                                  <hr class="mt-1"/>
+
+                                  <pre class="small mb-4 text-break"  >{{ vaga.requisitos }}</pre>
+                              </div>
+                              <div class="modal-footer">
+                                    <span class="fst-italic fw-light small d-flex justify-content-center align-items-center">{{ vaga.candidatosQtd }}
+                                        {% if vaga.candidatosQtd == 1 %}
+                                        candidato
+                                        {% else %}
+                                        candidatos
+                                        {% endif %}
+                                        nesta vaga.</span>
+
+                                    <button data-id="{{ vaga.id }}" data-bs-toggle="modal" data-bs-target="#compatibilidade" class="compatibilidadeButton btn btn-warning text-white text-uppercase fw-bold">Verificar compatibilidade <i class="bi bi-lightning-charge-fill"></i></button>
+                                    {% if session['candidato'] in vaga.candidatosID  %}
+                                        <form action="{{ url_for('candidato_retirar', vaga_id=vaga.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-danger text-uppercase fw-bold d-flex justify-content-center align-items-center" >Retirar candidatura <i class="ms-2 text-white bi bi-box-arrow-right"></i></button>
+                                        </form>
+                                    {% else %}
+                                        <form action="{{ url_for('candidato_aplicar', vaga_id=vaga.id) }}" method="POST">
+                                            <button type="submit" class="btn btn-primary text-uppercase fw-bold small">Candidatar-se</button>
+                                        </form>
+                                    {% endif %}
+
+                              </div>
+
+                            </div>
+                          </div>
+                    </div>
+
+                    <div class="modal fade" id="compatibilidade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"  aria-labelledby="compatibilidade" aria-hidden="true">
+                      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                          <div class="modal-header d-flex justify-content-center">
+                            <h1 class="modal-title fs-5 text-uppercase fw-bolder text-center" id="staticBackdropLabel">Compatibilidade</h1>
+                          </div>
+                          <div class="modal-body p-3 d-flex flex-column align-items-center">
+
+                              <div id="spinnerCompatibilidade" class="spinner-border p-3" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                              </div>
+                              <div id="compatibilidadeDiv"></div>
+
+                          </div>
+                          <div class="modal-footer">
+                                <button id="backCompatibilidadeButton"  class="btn btn-primary text-white text-uppercase fw-bolder " data-bs-toggle="modal" data-bs-target="#ver_detalhes_{{ vaga.id }}">VOLTAR</button>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                    {% endif%}
+                {% endfor %}
+            {% else %}
+                <div class="d-flex justify-content-center">
+                    <form id="login_form" novalidate class='needs-validation vaga_form d-flex w-75 shadow rounded flex-column p-2 pe-3 ps-3 ' action="{{ url_for('logar', tipo='candidato') }}" method="POST">
+                        <h2 class="mx-auto text-center rounded rounded-4 w-75 text-uppercase fw-bold">Login</h2>
+                        <hr class="mt-0 mb-4">
+
+                        <div class="form-group">
+                            <label class="form-label" required>Seu e-mail</label>
+                            <input class='form-control' type="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" required>Sua senha</label>
+                            <input class="form-control" type="password" name="senha" required>
+                        </div>
+
+
+                        <button class="btn btn-primary p-2 my-3 text-white text-uppercase fw-bold" type="submit">Logar</button>
+
+                        <p class="text-center" style="font-size: 0.8rem">Ainda não tem um cadastro? <span class="change_form">Cadastre-se</span> </p>
+                    </form>
+
+                    <form id="register_form" novalidate class='needs-validation vaga_form d-none d-flex w-75 shadow rounded flex-column p-2 pe-3 ps-3' action="{{ url_for('registrar', tipo='candidato') }}" method="POST">
+                        <h2 class="mx-auto text-center rounded rounded-4 w-75 text-uppercase fw-bold">Cadastro</h2>
+                        <hr class="mt-0 mb-4">
+
+                        <div class="form-group">
+                            <label class="form-label">Seu nome</label>
+                            <input class="form-control" type="text" name="nome" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Seu e-mail</label>
+                            <input class="form-control" type="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Sua senha</label>
+                            <input  class="form-control" type="password" name="senha" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Data de nascimento</label>
+                            <input id="data-de-nascimento" class="form-control" type="date" name="nascimento" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label d-block">Gênero</label>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="genero" id="inlineRadio1" value="masculino" required>
+                              <label class="form-check-label" for="inlineRadio1">Masculino</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                              <input class="form-check-input" type="radio" name="genero" id="inlineRadio2" value="feminino" required>
+                              <label class="form-check-label" for="inlineRadio2">Feminino</label>
+                            </div>
+                        </div>
+
+
+
+                        <div class="form-group">
+                            <label class="form-label">Sua descrição (Habilidades e autodescrição)</label>
+                            <textarea class="form-control" style="height: 200px;resize: none;"  type="text" name="descricao" required></textarea>
+                        </div>
+
+                        <button class="btn btn-primary p-2 my-3 text-white text-uppercase fw-bold" type="submit">Cadastrar-se</button>
+
+                        <p class="text-center" style="font-size: 0.8rem">Já tem um cadastro? <span class="change_form">Login</span> </p>
+                    </form>
+                </div>
+            {% endif %}
+{% endblock %}

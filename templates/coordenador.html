@@ -1,0 +1,388 @@
+{% extends 'template.html' %}
+{% block title %}DevEstagios - Coordenador{% endblock %}
+{% block perfil %}{% if 'coordenador' in session %} <p class="mb-0 text-uppercase fw-bold text-white">Perfil</p> <i id="profileIcon" class="fs-1 text-white bi bi-person-circle" style="cursor: pointer"></i>{% endif %} {% endblock %}
+{% block logout %}{% if 'coordenador' in session %}
+    <form style="cursor: pointer" class="d-flex align-items-center justify-content-center gap-2" id="logout_form" action="{{ url_for('deslogar', tipo='coordenador') }}" method="POST">
+        <p class="mb-0 text-uppercase fw-bold text-white">SAIR</p>
+        <i class="navbar-text text-danger fs-4 bi bi-box-arrow-right"></i>
+    </form>
+{% endif %} {% endblock %}
+
+{% block usuario %}
+    {% if 'coordenador' in session %}
+    {{ coordenador.nome }}
+    {% endif %}
+{% endblock %}
+
+
+{% block content %}
+            {% if 'coordenador' in session %}
+                <a id="data-login-checker" data-login-checker="coordenador"></a>
+
+                <form class='vaga_form w-100 flex-column p-2 pe-3 ps-3 d-flex align-items-center' action="{{ url_for('editar', tipo='coordenador', id=coordenador.id)  }}" method="POST">
+                    <div class="modal fade" id="perfil" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="perfil" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5 text-uppercase fw-bolder" id="staticBackdropLabel">Meu perfil</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>NOME</label>
+                                            <input class='form-control' type="text" maxlength="100" value="{{ coordenador.nome }}" name="nome">
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>EMAIL</label>
+                                            <input class="form-control" type="email"  value="{{ coordenador.email }}" name="email" disabled>
+                                        </div>
+
+                              </div>
+                              <div class="modal-footer">
+                                    <button class="btn btn-primary text-white text-uppercase fw-bolder" type="submit">Salvar</button>
+                              </div>
+
+                            </div>
+                          </div>
+                    </div>
+                </form>
+
+
+                <div class="container d-flex justify-content-center align-items-center flex-column">
+                    <h1 class="text-center text-uppercase fw-bold">Área do coordenador</h1>
+
+                    <!-- Abre o modal para adicionar vaga -->
+                    <div class="w-100 d-flex px-3 mb-5 gap-2 justify-content-center align-items-center">
+                        <button type="button" class="btn btn-primary text-uppercase fw-bolder" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Adicionar vaga <i class="bi bi-plus-circle ms-1"></i></button>
+                        <button class="btn btn-secondary text-uppercase fw-bolder" type="button" data-bs-toggle="offcanvas" data-bs-target="#vagasEncerradas" aria-controls="minhasVagas">VER VAGAS ENCERRADAS <i class="bi bi-eye ms-1"></i></button>
+                    </div>
+
+
+                </div>
+
+                <div class="offcanvas offcanvas-start"  tabindex="-1" id="vagasEncerradas" aria-labelledby="vagasEncerradas" >
+                  <div class="offcanvas-header">
+                    <h5 class="offcanvas-title text-uppercase fw-bold" id="offcanvasExampleLabel">Vagas encerradas</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                  </div>
+
+
+                  <div class="offcanvas-body">
+                    {% for vaga in vagasEncerradas %}
+                        <div class="card mb-5 shadow ">
+                          <div class="card-header p-3 d-flex justify-content-start align-items-center">
+                              <p class="fs-5 fw-bold p-0 m-0 text-uppercase ">{{ vaga.titulo }}</p>
+                          </div>
+                          <div class="card-body p-3 small">
+                              <p class="card-text text-uppercase mb-1"><span class="fw-bold">Status:</span>  <p class="text-success"> Um candidato já foi selecionado! </p></p>
+
+                              <button type="submit" class="btn btn-danger text-white fw-bolder text-uppercase" data-bs-toggle="modal" data-bs-target="#excluir_vaga_{{ vaga.id }}"><i class="bi bi-trash3-fill"></i></button>
+
+                          </div>
+                        </div>
+                    {% endfor %}
+
+                  </div>
+                </div>
+
+                <form id="login_form" novalidate class='needs-validation vaga_form d-flex w-100 flex-column p-2 pe-3 ps-3 align-items-center' action="{{ url_for('coordenador_adicionar_vaga') }}" method="POST">
+                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5 text-uppercase fw-bold" id="staticBackdropLabel">Nova vaga</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                                <div class="form-group w-100">
+                                    <label class="form-label" >Título</label>
+                                    <input class='form-control' type="text" name="titulo" maxlength="100" required >
+                                </div>
+
+                                <div class="form-group w-100">
+                                    <label class="form-label" required>Concedente</label>
+                                    <input class="form-control" type="text" name="concedente" maxlength="100" required >
+                                </div>
+
+                                 <div class="form-group w-100">
+                                    <label class="form-label" >Local</label>
+                                    <input class="form-control" type="text" name="local" maxlength="100" required>
+                                </div>
+
+                                <div class="form-group w-100">
+                                    <label class="form-label" >Bolsa</label>
+                                    <input class="form-control" type="number" name="bolsa" required min="500" max="10000" >
+                                </div>
+
+                                <div class="form-group w-100">
+                                    <label class="form-label d-block">Beneficios</label>
+                                     <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="beneficios" value="Vale Transporte">
+                                      <label class="form-check-label" for="inlineCheckbox1">Vale Refeição</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                      <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="beneficios" value="Vale Refeição">
+                                      <label class="form-check-label" for="inlineCheckbox2">Vale Transporte</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group w-100">
+                                    <label class="form-label">Turno:</label>
+                                    <select class="form-select" name="turno" aria-label="Default select example" required>
+                                      <option selected disabled value="">Selecione o turno</option>
+                                      <option value="Manhã">Manhã</option>
+                                      <option value="Tarde">Tarde</option>
+                                    </select>
+                                </div>
+
+
+                                <div class="form-group w-100">
+                                    <label class="form-label" >Requisitos</label>
+                                    <textarea class="form-control" style="height: 200px;resize: none;"  type="text" name="requisitos" required ></textarea>
+                                </div>
+
+
+                          </div>
+                          <div class="modal-footer">
+                                <button class="btn btn-primary  text-white fw-bolder text-uppercase" type="submit">Adicionar</button>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                </form>
+
+                <div class="modal fade" id="sugestao" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"  aria-labelledby="sugestao" aria-hidden="true">
+                      <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                          <div class="modal-header d-flex justify-content-center">
+                            <h1 class="modal-title fs-5 text-uppercase fw-bolder text-center" id="staticBackdropLabel">Sugestão</h1>
+                          </div>
+                          <div class="modal-body p-5 d-flex flex-column align-items-center">
+
+                              <div id="spinnerSugestao" class="spinner-border p-3" role="status">
+                                  <span class="visually-hidden">Loading...</span>
+                              </div>
+                              <div id="sugestaoDiv" class="w-100"></div>
+
+                          </div>
+                          <div class="modal-footer">
+                                  <button id="backSugestaoButton" class="btn btn-primary text-white text-uppercase fw-bolder " data-bs-toggle="modal" >VOLTAR</button>
+                                  <form id="formConfirmarCandidato" method="POST">
+                                    <button class="confirmarSugestaoButton btn btn-warning text-white text-uppercase fw-bolder" >CONFIRMAR <i class="bi bi-lightning-charge-fill"></i></button>
+                                  </form>
+                          </div>
+
+                        </div>
+                      </div>
+                </div>
+
+                {% for vaga in vagas %}{% if not vaga.selecionado %}
+
+                    <div class="card mb-5 shadow ">
+                      <div class="card-header p-3 d-flex justify-content-start align-items-center">
+                          <p class="fs-5 fw-bold p-0 m-0 text-uppercase ">{{ vaga.titulo }}</p>
+                      </div>
+                      <div class="card-body p-3 small">
+                        <p class="card-text text-uppercase mb-1"><span class="fw-bold">Concedente:</span> {{ vaga.concedente }}</p>
+                        <p class="card-text text-uppercase mb-1"><span class="fw-bold">Local de estágio:</span> {{ vaga.local }}</p>
+                        <p class="card-text text-uppercase "><span class="fw-bold">Valor da bolsa:</span> R${{ vaga.bolsa }}</p>
+
+                        <div class="container d-flex m-0 p-0  gap-2 ">
+                            {% if not vaga.selecionado %}
+                                <button class="btn btn-info text-white fw-bolder text-uppercase" data-bs-toggle="modal" data-bs-target="#ver_candidatos_{{ vaga.id }}">Ver candidatos  <i class="bi bi-people-fill ms-1"></i></button>
+                                <button class="btn btn-primary fw-bolder text-uppercase" data-bs-toggle="modal" data-bs-target="#editar_{{ vaga.id }}">Editar  <i class="bi bi-pencil-square ms-1"></i></button>
+                            {% else %}
+                                <button type="button" class="btn btn-secondary text-uppercase fw-bold" disabled>Vaga encerrada (CANDIDATO JÁ SELECIONADO)</button>
+                            {% endif %}
+
+
+                            <button type="submit" class="btn btn-danger text-white fw-bolder text-uppercase" data-bs-toggle="modal" data-bs-target="#excluir_vaga_{{ vaga.id }}"><i class="bi bi-trash3-fill"></i></button>
+
+                        </div>
+                      </div>
+                    </div>
+
+                     <form id="login_form" novalidate class='needs-validation vaga_form d-flex w-100 flex-column p-2 pe-3 ps-3 align-items-center ' action="{{ url_for('coordenador_editar_vaga', vaga_id=vaga.id) }}" method="POST">
+                        <div class="modal fade" id="editar_{{ vaga.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="{{ vaga.id }}" aria-hidden="true">
+                              <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h1 class="modal-title fs-5 text-uppercase fw-bold" id="staticBackdropLabel">Editar vaga</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                  </div>
+
+                                  <div class="modal-body">
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label fw-bold text-uppercase" >Título</label>
+                                            <input class='form-control mb-1' type="text" name="titulo" maxlength="100" value="{{ vaga.titulo }}" required >
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" required>Concedente</label>
+                                            <input class="form-control" type="text" name="concedente" maxlength="100" value="{{ vaga.concedente }}" required >
+                                        </div>
+
+                                         <div class="form-group w-100">
+                                            <label class="form-label" >Local</label>
+                                            <input class="form-control" type="text" name="local" maxlength="100" value="{{ vaga.local }}" required>
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" >Bolsa</label>
+                                            <input class="form-control" type="number" name="bolsa" min="500" max="10000" value="{{ vaga.bolsa }}" required >
+                                        </div>
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label d-block">Beneficios</label>
+                                             <div class="form-check form-check-inline">
+                                              <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="beneficios" {% if "Vale Refeição" in vaga.beneficios %} checked {% endif %} value="Vale Refeição">
+                                              <label class="form-check-label" for="inlineCheckbox1">Vale Refeição</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                              <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="beneficios" {% if "Vale Transporte" in vaga.beneficios %} checked {% endif %} value="Vale Transporte">
+                                              <label class="form-check-label" for="inlineCheckbox2">Vale Transporte</label>
+                                            </div>
+                                        </div>
+
+                                         <div class="form-group w-100">
+                                            <label class="form-label">Turno:</label>
+                                            <select class="form-select" name="turno" aria-label="Default select example">
+                                            {% if vaga.turno == 'Manhâ' %}
+                                              <option >Selecione o turno</option>
+                                              <option selected value="Manhã">Manhã</option>
+                                              <option value="Tarde">Tarde</option>
+                                            {% else %}v
+                                              <option >Selecione o turno</option>
+                                              <option value="Manhã">Manhã</option>
+                                              <option selected value="Tarde">Tarde</option>
+                                            {% endif %}
+                                            </select>
+                                         </div>
+
+
+                                        <div class="form-group w-100">
+                                            <label class="form-label" >Requisitos</label>
+                                            <textarea class="form-control" style="height: 200px;resize: none;"  type="text" name="requisitos" required >{{ vaga.requisitos }}</textarea>
+                                        </div>
+
+
+
+
+                                  </div>
+                                  <div class="modal-footer">
+                                        <button class="btn btn-primary text-white text-uppercase fw-bold" type="submit">Salvar</button>
+                                  </div>
+
+                                </div>
+                              </div>
+                        </div>
+                    </form>
+
+                    {% for candidato in vaga.candidatos %}
+                        <div class="modal fade" id="ver_descricao_{{ candidato.id }}" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"  aria-labelledby="{{ candidato.id }}" aria-hidden="true">
+                              <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                                <div class="modal-content">
+                                  <div class="modal-header d-flex justify-content-center">
+                                    <h1 class="modal-title fs-5 text-uppercase fw-bolder text-center" id="staticBackdropLabel">Descrição</h1>
+                                  </div>
+                                  <div class="modal-body p-3 d-flex flex-column align-items-center">
+                                      <pre class="border border-white p-2 w-100 rounded" style="text-align: justify">{{ candidato.descricao }}</pre>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button class="btn btn-primary text-white text-uppercase fw-bolder" data-bs-toggle="modal" data-bs-target="#ver_candidatos_{{ vaga.id }}">VOLTAR</button>
+                                  </div>
+
+                                </div>
+                              </div>
+                        </div>
+                    {% endfor %}
+
+                    <div class="modal fade" id="ver_candidatos_{{ vaga.id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="{{ vaga.id }}" aria-hidden="true">
+                          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h1 class="modal-title fs-5 text-uppercase fw-bolder" id="staticBackdropLabel">Candidatos</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body d-flex w-100 flex-column p-5">
+                                    {% for candidato in vaga.candidatos %}
+
+                                        <div class="card mb-5 shadow ">
+                                          <div class="card-header p-3 d-flex justify-content-start align-items-center">
+                                              <p class="fs-5 fw-bold p-0 m-0 text-uppercase ">{{ candidato.nome }}</p>
+                                          </div>
+                                          <div class="card-body p-3 small">
+                                            <p class="card-text text-uppercase mb-1"><span class="fw-bold me-1">Email:</span>{{ candidato.email }}</p>
+                                            <p class="card-text text-uppercase mb-1"><span class="fw-bold me-1">Data de nascimento:</span>{{ candidato.nascimentoFormatado }}</p>
+
+                                            <button type="button" class="btn btn-info text-white fw-bolder text-uppercase my-2" data-bs-toggle="modal" data-bs-target="#ver_descricao_{{ candidato.id }}" >Visualizar descrição</button>
+                                          </div>
+                                        </div>
+
+                                    {% endfor %}
+
+                              </div>
+                              <div class="modal-footer">
+                                    <button class="sugestaoButton btn btn-warning text-white text-uppercase fw-bolder" data-id="{{ vaga.id }}" data-bs-toggle="modal" data-bs-target="#sugestao" {% if vaga.candidatosQtd < 2 %} disabled {% endif %} >Sugerir Candidato <i class="bi bi-lightning-charge-fill"></i></button>
+                              </div>
+
+                            </div>
+                          </div>
+                    </div>
+
+               {% endif %} {% endfor %}
+               {% for vaga in vagas  %}
+                     <form class="d-flex flex-column justify-content-center align-items-center w-100" action="{{ url_for('coordenador_remover_vaga', vaga_id=vaga.id) }}" method="POST">
+                        <div class="modal fade" id="excluir_vaga_{{ vaga.id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title text-uppercase fw-bold" id="exampleModalLabel">Excluir Vaga</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                            <div class="alert alert-danger d-flex flex-column justify-content-center align-items-center" role="alert">
+                                              <p class="alert-heading d-flex justify-content-center align-items-center"><i class="bi bi-exclamation-triangle fs-2 text-danger me-2"></i> ESTA VAGA SERÁ EXCLUÍDA PERMANENTEMENTE, DESEJA CONFIRMAR?</p>
+                                              <p class="mb-0 fw-bold">[{{ vaga.titulo }}]</p>
+                                            </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-danger text-uppercase fw-bold">Confirmar Exclusão <i class="bi bi-trash3-fill"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                {#  Formulário de login do coordenador  #}
+                <div class="d-flex justify-content-center">
+                    <form id="login_form" novalidate class='needs-validation vaga_form d-flex w-75 shadow rounded flex-column p-2 pe-3 ps-3' action="{{ url_for('logar', tipo='coordenador') }}" method="POST">
+                        <h2 class="text-center mx-auto rounded rounded-4 w-75 text-uppercase fw-bold">Coordenador</h2>
+                        <hr class="mt-0 mb-4">
+
+                        <div class="form-group">
+                            <label class="form-label" required>Seu e-mail</label>
+                            <input class='form-control' type="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" required>Sua senha</label>
+                            <input class="form-control" type="password" name="senha" required>
+                        </div>
+
+                        <button class="btn btn-primary p-2 my-3 text-white text-uppercase fw-bold" type="submit">Logar</button>
+                    </form>
+
+
+                </div>
+            {% endif %}
+{% endblock %}
