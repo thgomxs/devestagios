@@ -4,7 +4,7 @@
 
 <p align="center">
    <a href="https://www.linkedin.com/in/thgomxs/" >
-   <img alt="Thiago Gomes [Linkedin]" src="https://img.shields.io/badge/-Thiago-Gomes-1E65CF?style=flat&logo=Linkedin&logoColor=white"/>
+   <img alt="Thiago Gomes [Linkedin]" src="https://img.shields.io/badge/-ThiagoGomes-1E65CF?style=flat&logo=Linkedin&logoColor=white"/>
    </a>
    <a href="https://github.com/thgomxs/devestagios/blob/main/LICENSE" >
    <img alt="MIT-LICENSE" src="https://img.shields.io/github/license/thgomxs/devestagios?color=rgb%2830%2C%20101%2C%20207%29"/>
