@@ -8,7 +8,7 @@
 </p>
 
 <p>
-  Um website de estágios para a área de tecnologia com ChatGPT integrado automatizando diversas funções. Desenvolvido para a matéria de Orientação a Objetos na Universidade de Brasília - FGA.
+  Um website de estágios para a área de tecnologia utilizando padrões de projeto e com a API do ChatGPT integrado automatizando diversas funções. Desenvolvido para a matéria de Orientação a Objetos na Universidade de Brasília - FGA.
 </p>
 
 <p align="center">
